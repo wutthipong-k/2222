@@ -1,0 +1,1294 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเลขฐาน | Number Base Tool</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+        :root {
+            --bg1: #0b0f1a;
+            --bg2: #1a1a3e;
+            --bg3: #2d1b69;
+            --accent1: #00d4ff;
+            --accent2: #7b2ff7;
+            --accent3: #ff6b9d;
+            --glass: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --text: #f0f4ff;
+            --text-dim: #9aa8c7;
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --result-bg: rgba(0, 0, 0, 0.4);
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Light theme */
+        body.light {
+            --bg1: #e8f4ff;
+            --bg2: #f3e8ff;
+            --bg3: #ffe8f0;
+            --accent1: #0099cc;
+            --accent2: #6a1b9a;
+            --accent3: #d81b60;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.12);
+            --text: #1a2333;
+            --text-dim: #5a6a85;
+            --input-bg: rgba(255, 255, 255, 0.85);
+            --card-bg: rgba(255, 255, 255, 0.6);
+            --result-bg: rgba(255, 255, 255, 0.75);
+            --shadow: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Theme color variations */
+        body.theme-green {
+            --accent1: #00e676;
+            --accent2: #00b0ff;
+            --accent3: #76ff03;
+        }
+        body.theme-rose {
+            --accent1: #ff4081;
+            --accent2: #ff6e40;
+            --accent3: #ffd740;
+        }
+        body.theme-gold {
+            --accent1: #ffd54f;
+            --accent2: #ffab40;
+            --accent3: #ff7043;
+        }
+        body.theme-violet {
+            --accent1: #b388ff;
+            --accent2: #ea80fc;
+            --accent3: #536dfe;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Prompt', 'Segoe UI', Tahoma, sans-serif;
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+            background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+            background-size: 400% 400%;
+            animation: bgShift 15s ease infinite;
+        }
+
+        @keyframes bgShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating background orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            z-index: 0;
+            animation: float 18s ease-in-out infinite;
+        }
+        .orb-1 {
+            width: 400px; height: 400px;
+            background: var(--accent1);
+            top: -100px; left: -100px;
+        }
+        .orb-2 {
+            width: 350px; height: 350px;
+            background: var(--accent2);
+            bottom: -80px; right: -80px;
+            animation-delay: -6s;
+        }
+        .orb-3 {
+            width: 250px; height: 250px;
+            background: var(--accent3);
+            top: 50%; left: 60%;
+            animation-delay: -12s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-40px) scale(1.1); }
+        }
+
+        /* Floating binary particles */
+        .particle {
+            position: fixed;
+            font-family: 'JetBrains Mono', monospace;
+            color: rgba(0, 212, 255, 0.15);
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 0;
+            animation: rise linear infinite;
+            user-select: none;
+        }
+        @keyframes rise {
+            0% { transform: translateY(110vh); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh); opacity: 0; }
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 620px;
+            margin: 0 auto;
+            padding: 25px 16px 40px;
+        }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 36px 30px;
+            box-shadow:
+                0 20px 60px var(--shadow),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .logo-badge {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2em;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            box-shadow: 0 8px 25px rgba(123, 47, 247, 0.4);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        h1 {
+            font-size: 2.1em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleShift 5s ease infinite;
+        }
+        @keyframes titleShift {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin-top: 6px;
+            font-weight: 300;
+            font-size: 0.95em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .theme-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .theme-toggle {
+            padding: 8px 14px;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            background: var(--glass);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: var(--accent2);
+            color: white;
+        }
+        .theme-colors {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .color-dot {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 0;
+        }
+        body.light .color-dot { border-color: rgba(0,0,0,0.3); }
+        .color-dot:hover {
+            transform: scale(1.25);
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+            padding: 6px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 16px;
+        }
+        .tab {
+            flex: 1;
+            min-width: 90px;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.88em;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 18px rgba(0, 212, 255, 0.35);
+            transform: scale(1.03);
+        }
+
+        .panel {
+            display: none;
+        }
+        .panel.active {
+            display: block;
+            animation: panelIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(14px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.82em;
+            color: var(--text-dim);
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .row .form-group {
+            flex: 1;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid transparent;
+            border-radius: 14px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', 'Prompt', monospace;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        input::placeholder, textarea::placeholder {
+            color: #5d6a88;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent1);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+        }
+        select {
+            appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, var(--accent1) 50%),
+                              linear-gradient(135deg, var(--accent1) 50%, transparent 50%);
+            background-position: calc(100% - 20px) 55%, calc(100% - 15px) 55%;
+            background-size: 5px 5px;
+            background-repeat: no-repeat;
+            cursor: pointer;
+        }
+        textarea {
+            font-family: 'JetBrains Mono', monospace;
+            resize: vertical;
+        }
+
+        .input-icon {
+            position: relative;
+        }
+        .input-icon input {
+            padding-left: 42px;
+        }
+        .input-icon .icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .swap-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--accent1);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.3em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .swap-btn:hover {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: white;
+            transform: rotate(180deg) scale(1.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: white;
+            font-family: 'Prompt', sans-serif;
+            font-size: 1.05em;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.25);
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            transition: left 0.6s;
+        }
+        .btn:hover::after { left: 100%; }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(123, 47, 247, 0.4);
+        }
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .result-box {
+            margin-top: 16px;
+            padding: 16px 18px;
+            background: var(--result-bg);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1em;
+            word-break: break-all;
+            position: relative;
+            line-height: 1.5;
+            min-height: 52px;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            border-radius: 9px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s;
+            font-family: 'Prompt', sans-serif;
+        }
+        .copy-btn:hover {
+            background: var(--accent1);
+            color: #0b0f1a;
+        }
+        .copy-btn.copied {
+            background: #2ecc71;
+            color: white;
+        }
+        .result-value {
+            color: var(--accent1);
+            font-weight: 600;
+        }
+
+        .steps {
+            margin-top: 12px;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.25);
+            border-left: 3px solid var(--accent2);
+            border-radius: 0 12px 12px 0;
+            font-size: 0.9em;
+            color: #b8c8e8;
+            line-height: 1.7;
+            display: none;
+            animation: panelIn 0.3s ease;
+        }
+        .steps b {
+            color: var(--accent1);
+        }
+        .highlight {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+        .error {
+            color: #ff6b8b !important;
+            border-color: rgba(255, 107, 139, 0.4) !important;
+            background: rgba(255, 107, 139, 0.08) !important;
+        }
+
+        .panel-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 6px;
+        }
+
+        .history {
+            margin-top: 22px;
+        }
+        .history h3 {
+            font-size: 0.95em;
+            color: var(--accent1);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        .history h3 .h-btns {
+            display: flex;
+            gap: 6px;
+        }
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82em;
+            cursor: pointer;
+            transition: all 0.3s;
+            word-break: break-all;
+        }
+        .history-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--accent1);
+            transform: translateX(4px);
+        }
+        .history-time {
+            color: var(--text-dim);
+            font-size: 0.75em;
+            margin-right: 8px;
+        }
+        .clear-history {
+            background: none;
+            border: 1px solid rgba(255, 107, 139, 0.4);
+            color: var(--accent3);
+            cursor: pointer;
+            font-size: 0.78em;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-family: 'Prompt', sans-serif;
+            transition: all 0.3s;
+        }
+        .clear-history:hover {
+            background: var(--accent3);
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.8em;
+            color: #6b7898;
+            letter-spacing: 1px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(46, 204, 113, 0.95);
+            color: white;
+            padding: 12px 26px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 8px 30px rgba(46, 204, 113, 0.4);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            font-family: 'Prompt', sans-serif;
+            font-weight: 500;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 560px) {
+            .container { padding: 24px 16px; }
+            h1 { font-size: 1.5em; }
+            .tab { min-width: 20%; padding: 10px 4px; font-size: 0.78em; }
+            .theme-bar { gap: 6px; }
+            .theme-colors { gap: 5px; }
+            .color-dot { width: 22px; height: 22px; }
+            .row { flex-wrap: wrap; }
+            .row .form-group { flex: 1 1 100% !important; }
+            .swap-btn { width: 40px; height: 40px; }
+            .panel-card { padding: 16px; }
+        }
+        @media (max-width: 380px) {
+            .tabs { gap: 5px; padding: 4px; }
+            .tab { font-size: 0.7em; }
+            .logo-badge { width: 56px; height: 56px; font-size: 1.8em; }
+            h1 { font-size: 1.3em; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background decoration -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div id="particles"></div>
+
+    <div class="page">
+        <div class="container">
+            <div class="header">
+                <div class="logo-badge">🔢</div>
+                <h1>ระบบเลขฐาน</h1>
+                <p class="subtitle">Converter • Calculator • Bitwise</p>
+
+                <div class="theme-bar">
+                    <button class="theme-toggle" onclick="toggleTheme()" title="สลับมืด/สว่าง">🌓</button>
+                    <div class="theme-colors">
+                        <button class="color-dot" style="background:linear-gradient(135deg,#00d4ff,#7b2ff7)" onclick="setColorTheme('')" title="ฟ้า-ม่วง"></button>
+                        <button class="color-dot" style="background:linear-gradient(135deg,#00e676,#00b0ff)" onclick="setColorTheme('theme-green')" title="เขียว"></button>
+                        <button class="color-dot" style="background:linear-gradient(135deg,#ff4081,#ff6e40)" onclick="setColorTheme('theme-rose')" title="ชมพู"></button>
+                        <button class="color-dot" style="background:linear-gradient(135deg,#ffd54f,#ffab40)" onclick="setColorTheme('theme-gold')" title="ทอง"></button>
+                        <button class="color-dot" style="background:linear-gradient(135deg,#b388ff,#ea80fc)" onclick="setColorTheme('theme-violet')" title="ม่วง"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showPanel('convert', this)">แปลงค่า</button>
+                <button class="tab" onclick="showPanel('arithmetic', this)">คำนวณ</button>
+                <button class="tab" onclick="showPanel('bitwise', this)">Bitwise</button>
+                <button class="tab" onclick="showPanel('ascii', this)">ข้อความ</button>
+            </div>
+
+            <!-- แปลงค่า -->
+            <div id="convert" class="panel active">
+                <div class="panel-card">
+                    <div class="form-group">
+                        <label>📥 จากระบบเลข</label>
+                        <select id="convertFrom" onchange="clearResult('convertResult','convertSteps')">
+                            <option value="dec">Decimal (ฐาน 10)</option>
+                            <option value="bin">Binary (ฐาน 2)</option>
+                            <option value="oct">Octal (ฐาน 8)</option>
+                            <option value="hex">Hexadecimal (ฐาน 16)</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div style="display:flex;align-items:center;justify-content:center">
+                            <button class="swap-btn" onclick="swapConvert()" title="สลับ">⇄</button>
+                        </div>
+                        <div class="form-group" style="flex:1">
+                            <label>📤 เป็นระบบเลข</label>
+                            <select id="convertTo" onchange="clearResult('convertResult','convertSteps')">
+                                <option value="bin" selected>Binary (ฐาน 2)</option>
+                                <option value="dec">Decimal (ฐาน 10)</option>
+                                <option value="oct">Octal (ฐาน 8)</option>
+                                <option value="hex">Hexadecimal (ฐาน 16)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 ป้อนตัวเลข</label>
+                        <div class="input-icon">
+                            <span class="icon">✏️</span>
+                            <input type="text" id="convertInput" placeholder="ป้อนตัวเลข..." onkeydown="if(event.key==='Enter')convert()">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="convert()">⚡ แปลงค่า</button>
+                    <div class="result-box" id="convertResult">ผลลัพธ์จะแสดงที่นี่<button class="copy-btn" onclick="copyText('convertResult')">📋</button></div>
+                    <div class="steps" id="convertSteps"></div>
+
+                    <div class="form-group">
+                        <label>🎲 ฝึกแปลง (สุ่มตัวเลข)</label>
+                        <select id="randBase" style="margin-bottom:8px">
+                            <option value="dec">Decimal (ฐาน 10)</option>
+                            <option value="bin">Binary (ฐาน 2)</option>
+                            <option value="oct">Octal (ฐาน 8)</option>
+                            <option value="hex">Hexadecimal (ฐาน 16)</option>
+                        </select>
+                        <div class="row">
+                            <button class="btn" style="flex:1;margin:0;background:linear-gradient(135deg,#00b894,#00cec9)" onclick="randomNumber()">🎲 สุ่มตัวเลข</button>
+                            <button class="btn" style="flex:1;margin:0;background:linear-gradient(135deg,#2ecc71,#27ae60)" onclick="fillConvert()">➡️ ใช้เป็น input</button>
+                        </div>
+                        <div class="result-box" id="randResult" style="margin-top:8px"><button class="copy-btn" onclick="copyText('randResult')">📋</button></div>
+                    </div>
+                    <div class="form-group">
+                        <label>📊 แสดงหลายฐานพร้อมกัน</label>
+                        <button class="btn" style="background:linear-gradient(135deg,#f39c12,#e67e22)" onclick="showAllBases()">📊 ดูค่าในทุกฐาน</button>
+                        <div class="result-box" id="allBasesResult" style="margin-top:8px;font-size:0.95em;line-height:2"><button class="copy-btn" onclick="copyText('allBasesResult')">📋</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- คำนวณ -->
+            <div id="arithmetic" class="panel">
+                <div class="panel-card">
+                    <div class="form-group">
+                        <label>🧮 ระบบเลข</label>
+                        <select id="arithFrom">
+                            <option value="bin">Binary (ฐาน 2)</option>
+                            <option value="dec">Decimal (ฐาน 10)</option>
+                            <option value="oct">Octal (ฐาน 8)</option>
+                            <option value="hex">Hexadecimal (ฐาน 16)</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>🔢 ตัวเลขที่ 1</label>
+                            <input type="text" id="arithInput1" placeholder="ตัวเลขที่ 1..." onkeydown="if(event.key==='Enter')calc()">
+                        </div>
+                        <div class="form-group" style="flex:0 0 135px">
+                            <label>🛠️ ตัวดำเนิน</label>
+                            <select id="arithOp">
+                                <option value="add">+ บวก</option>
+                                <option value="sub">− ลบ</option>
+                                <option value="mul">× คูณ</option>
+                                <option value="div">÷ หาร</option>
+                                <option value="mod">% เศษ</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 ตัวเลขที่ 2</label>
+                        <input type="text" id="arithInput2" placeholder="ตัวเลขที่ 2..." onkeydown="if(event.key==='Enter')calc()">
+                    </div>
+                    <button class="btn" onclick="calc()">⚡ คำนวณ</button>
+                    <div class="result-box" id="arithResult">ผลลัพธ์จะแสดงที่นี่<button class="copy-btn" onclick="copyText('arithResult')">📋</button></div>
+                    <div class="steps" id="arithSteps"></div>
+
+                    <div class="form-group">
+                        <label>⚖️ เปรียบเทียบค่า</label>
+                        <button class="btn" style="background:linear-gradient(135deg,#6a11cb,#2575fc)" onclick="compare()">⚖️ เปรียบเทียบ</button>
+                        <div class="result-box" id="compareResult" style="margin-top:8px;font-size:0.95em"><button class="copy-btn" onclick="copyText('compareResult')">📋</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bitwise -->
+            <div id="bitwise" class="panel">
+                <div class="panel-card">
+                    <div class="form-group">
+                        <label>🔀 ระบบเลข (input)</label>
+                        <select id="bitFrom">
+                            <option value="bin">Binary (ฐาน 2)</option>
+                            <option value="dec">Decimal (ฐาน 10)</option>
+                            <option value="hex">Hexadecimal (ฐาน 16)</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>🔢 ตัวเลขที่ 1</label>
+                            <input type="text" id="bitInput1" placeholder="ตัวเลขที่ 1..." onkeydown="if(event.key==='Enter')bitcalc()">
+                        </div>
+                        <div class="form-group" style="flex:0 0 125px">
+                            <label>🛠️ Bitwise</label>
+                            <select id="bitOp">
+                                <option value="and">AND</option>
+                                <option value="or">OR</option>
+                                <option value="xor">XOR</option>
+                                <option value="not">NOT</option>
+                                <option value="twos">2's complement</option>
+                                <option value="shl">Shift ซ้าย</option>
+                                <option value="shr">Shift ขวา</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 ตัวเลขที่ 2 / จำนวนครั้ง</label>
+                        <input type="text" id="bitInput2" placeholder="ตัวเลขที่ 2 หรือจำนวน shift..." onkeydown="if(event.key==='Enter')bitcalc()">
+                    </div>
+                    <button class="btn" onclick="bitcalc()">⚡ คำนวณ</button>
+                    <div class="result-box" id="bitResult">ผลลัพธ์จะแสดงที่นี่<button class="copy-btn" onclick="copyText('bitResult')">📋</button></div>
+                    <div class="steps" id="bitSteps"></div>
+                </div>
+            </div>
+
+            <!-- ข้อความ -->
+            <div id="ascii" class="panel">
+                <div class="panel-card">
+                    <div class="form-group">
+                        <label>📝 โหมด</label>
+                        <select id="asciiMode" onchange="clearResult('asciiResult','asciiSteps')">
+                            <option value="text2bin">ข้อความ → Binary</option>
+                            <option value="bin2text">Binary → ข้อความ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📄 อินพุต</label>
+                        <textarea id="asciiInput" rows="3" placeholder="ป้อนข้อความหรือ binary (คั่นด้วยช่องว่าง)..."></textarea>
+                    </div>
+                    <button class="btn" onclick="asciiConvert()">⚡ แปลง</button>
+                    <div class="result-box" id="asciiResult">ผลลัพธ์จะแสดงที่นี่<button class="copy-btn" onclick="copyText('asciiResult')">📋</button></div>
+                    <div class="steps" id="asciiSteps"></div>
+                </div>
+            </div>
+
+            <!-- ประวัติ -->
+            <div class="history">
+                <h3>
+                    📜 ประวัติการใช้งาน
+                    <span class="h-btns">
+                        <button class="clear-history" onclick="downloadAll()" style="border-color:#4dc3ff;color:#4dc3ff">⬇️ ดาวน์โหลด</button>
+                        <button class="clear-history" onclick="clearHistory()">🗑️ ล้างทั้งหมด</button>
+                    </span>
+                </h3>
+                <div id="historyList"></div>
+            </div>
+        </div>
+        <div class="footer">Number Base Tool • ฐาน 2 / 8 / 10 / 16 & Bitwise</div>
+    </div>
+
+    <div class="toast" id="toast">📋 คัดลอกแล้ว!</div>
+
+    <script>
+        const bases = { bin: 2, dec: 10, oct: 8, hex: 16 };
+        let history = JSON.parse(localStorage.getItem('nb_history') || '[]');
+        let saveHistory;
+
+        saveHistory = function(entry) {
+            history.unshift({ time: new Date().toLocaleTimeString(), text: entry });
+            if (history.length > 20) history.pop();
+            localStorage.setItem('nb_history', JSON.stringify(history));
+            renderHistory();
+        };
+        function renderHistory() {
+            const el = document.getElementById('historyList');
+            if (history.length === 0) {
+                el.innerHTML = '<div class="history-item" style="color:#5d6a88">ยังไม่มีประวัติการใช้งาน</div>';
+                return;
+            }
+            el.innerHTML = history.map((h) =>
+                `<div class="history-item" onclick="copyTextFrom('${escapeStr(h.text)}')" title="คลิกเพื่อคัดลอก">
+                    <span class="history-time">${h.time}</span> ${h.text}
+                </div>`
+            ).join('');
+        }
+        function escapeStr(s) {
+            return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+        function clearHistory() {
+            if (!confirm('ล้างประวัติทั้งหมด?')) return;
+            history = [];
+            localStorage.setItem('nb_history', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function showPanel(name, btn) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function showToast() {
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 1600);
+        }
+        function copyTextFrom(str) {
+            navigator.clipboard.writeText(str).then(showToast);
+        }
+
+        function copyText(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('error')) return;
+            const text = el.textContent.replace('📋', '').trim();
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = el.querySelector('.copy-btn');
+                btn.classList.add('copied');
+                btn.textContent = '✓';
+                showToast();
+                setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋'; }, 1500);
+            });
+        }
+
+        function clearResult(resId, stepId) {
+            document.getElementById(resId).textContent = 'ผลลัพธ์จะแสดงที่นี่';
+            const s = document.getElementById(stepId);
+            s.style.display = 'none';
+            document.getElementById(resId).classList.remove('error');
+        }
+
+        function isValidDigit(ch, base) {
+            if (ch >= '0' && ch <= '9') return parseInt(ch) < base;
+            if (ch >= 'A' && ch <= 'F') return parseInt(ch, 16) < base;
+            if (ch >= 'a' && ch <= 'f') return parseInt(ch, 16) < base;
+            return false;
+        }
+
+        function parseNumber(input, base) {
+            const cleaned = input.trim().toUpperCase().replace(/^0[BX]/g, '');
+            if (cleaned === '') throw new Error('กรุณาป้อนตัวเลข');
+            for (const ch of cleaned) {
+                if (!isValidDigit(ch, base)) {
+                    throw new Error(`ตัวเลข "${ch}" ไม่ถูกต้องสำหรับฐาน ${base}`);
+                }
+            }
+            return parseInt(cleaned, base);
+        }
+
+        function toBase(n, base) {
+            return n.toString(base).toUpperCase();
+        }
+
+        function convertFractional(raw, fromBase, toBaseVal) {
+            const parts = raw.split('.');
+            const intPart = parts[0] || '0';
+            const fracPart = parts.length > 1 ? parts[1] : '';
+
+            let decimal = parseInt(intPart, fromBase);
+
+            let fracDecimal = 0;
+            if (fracPart) {
+                for (let i = 0; i < fracPart.length; i++) {
+                    fracDecimal += parseInt(fracPart[i], fromBase) / Math.pow(fromBase, i + 1);
+                }
+            }
+            const total = decimal + fracDecimal;
+
+            if (fracPart === '') {
+                return { result: toBaseVal === 10 ? String(total) : Math.floor(total).toString(toBaseVal).toUpperCase(), decimal: total };
+            }
+
+            let intResult = Math.floor(total).toString(toBaseVal).toUpperCase();
+            let fracResult = '';
+            let fracTemp = fracDecimal;
+            for (let i = 0; i < 10 && fracTemp > 0; i++) {
+                fracTemp *= toBaseVal;
+                const digit = Math.floor(fracTemp);
+                fracResult += digit.toString(toBaseVal).toUpperCase();
+                fracTemp -= digit;
+            }
+            return { result: `${intResult}.${fracResult || '0'}`, decimal: total };
+        }
+
+        function swapConvert() {
+            const f = document.getElementById('convertFrom');
+            const t = document.getElementById('convertTo');
+            const tmp = f.value; f.value = t.value; t.value = tmp;
+            clearResult('convertResult', 'convertSteps');
+        }
+
+        // ---- แปลงค่า ----
+        function convert() {
+            const resultEl = document.getElementById('convertResult');
+            const stepEl = document.getElementById('convertSteps');
+            try {
+                const from = document.getElementById('convertFrom').value;
+                const to = document.getElementById('convertTo').value;
+                const raw = document.getElementById('convertInput').value.trim();
+
+                if (raw.includes('.')) {
+                    const { result: output, decimal } = convertFractional(raw, bases[from], bases[to]);
+                    resultEl.className = 'result-box';
+                    resultEl.innerHTML = `ผลลัพธ์: <span class="result-value">${output}</span><button class="copy-btn" onclick="copyText('convertResult')">📋</button>`;
+                    stepEl.style.display = 'block';
+                    stepEl.innerHTML = `<b>📐 ขั้นตอน:</b><br>${raw} (${from}) → ${decimal} (dec) → <span class="highlight">${output}</span> (${to})`;
+                    saveHistory(`${raw} (${from}) → ${output} (${to})`);
+                    return;
+                }
+
+                const decimal = parseNumber(raw, bases[from]);
+                const output = toBase(decimal, bases[to]);
+
+                resultEl.className = 'result-box';
+                resultEl.innerHTML = `ผลลัพธ์: <span class="result-value">${output}</span><button class="copy-btn" onclick="copyText('convertResult')">📋</button>`;
+
+                if (from === 'dec') {
+                    let n = decimal, steps = [];
+                    if (to === 'bin') {
+                        while (n > 0) {
+                            steps.push(`${n} ÷ 2 = ${Math.floor(n/2)} เศษ ${n%2}`);
+                            n = Math.floor(n/2);
+                        }
+                        stepEl.style.display = 'block';
+                        stepEl.innerHTML = '<b>📐 ขั้นตอน:</b><br>' + steps.reverse().join('<br>') +
+                            '<br><span class="highlight">อ่านเศษจากล่างขึ้นบน = ' + output + '</span>';
+                    } else {
+                        stepEl.style.display = 'block';
+                        stepEl.innerHTML = `<b>📐 วิธีแปลง:</b> ${output}`;
+                    }
+                } else {
+                    stepEl.style.display = 'block';
+                    stepEl.innerHTML = `<b>📐 ขั้นตอน:</b><br>${raw.trim().toUpperCase()} (${from}) → ${decimal} (dec) → <span class="highlight">${output}</span> (${to})`;
+                }
+                saveHistory(`${raw.trim().toUpperCase()} (${from}) → ${output} (${to})`);
+            } catch (e) {
+                resultEl.className = 'result-box error';
+                resultEl.innerHTML = e.message;
+                stepEl.style.display = 'none';
+            }
+        }
+
+        // ---- คำนวณ ----
+        function calc() {
+            const resultEl = document.getElementById('arithResult');
+            const stepEl = document.getElementById('arithSteps');
+            try {
+                const base = document.getElementById('arithFrom').value;
+                const v1 = parseNumber(document.getElementById('arithInput1').value, bases[base]);
+                const v2 = parseNumber(document.getElementById('arithInput2').value, bases[base]);
+                const op = document.getElementById('arithOp').value;
+                let result, opSymbol;
+                switch (op) {
+                    case 'add': result = v1 + v2; opSymbol = '+'; break;
+                    case 'sub': result = v1 - v2; opSymbol = '−'; break;
+                    case 'mul': result = v1 * v2; opSymbol = '×'; break;
+                    case 'div':
+                        if (v2 === 0) { document.getElementById('arithInput2').focus(); throw new Error('ไม่สามารถหารด้วยศูนย์ได้'); }
+                        result = Math.floor(v1 / v2); opSymbol = '÷'; break;
+                    case 'mod':
+                        if (v2 === 0) throw new Error('ไม่สามารถหารด้วยศูนย์ได้');
+                        result = v1 % v2; opSymbol = '%'; break;
+                }
+                let output = toBase(result, bases[base]);
+                if (result < 0) output = `-${toBase(Math.abs(result), bases[base])}`;
+
+                resultEl.className = 'result-box';
+                resultEl.innerHTML = `ผลลัพธ์: <span class="result-value">${output}</span><button class="copy-btn" onclick="copyText('arithResult')">📋</button>`;
+
+                stepEl.style.display = 'block';
+                stepEl.innerHTML = `<b>📐 ขั้นตอน:</b><br>` +
+                    `${toBase(v1, bases[base])} ${opSymbol} ${toBase(v2, bases[base])}<br>` +
+                    `= ${v1} ${opSymbol} ${v2} (ในทศนิยม)<br>` +
+                    `= <span class="highlight">${output}</span> (${base})`;
+
+                saveHistory(`${toBase(v1, bases[base])} ${opSymbol} ${toBase(v2, bases[base])} = ${output}`);
+            } catch (e) {
+                resultEl.className = 'result-box error';
+                resultEl.innerHTML = e.message;
+                stepEl.style.display = 'none';
+            }
+        }
+
+        // ---- เปรียบเทียบค่า ----
+        function compare() {
+            const resultEl = document.getElementById('compareResult');
+            try {
+                const base = document.getElementById('arithFrom').value;
+                const v1 = parseNumber(document.getElementById('arithInput1').value, bases[base]);
+                const v2 = parseNumber(document.getElementById('arithInput2').value, bases[base]);
+                const n1 = toBase(v1, bases[base]);
+                const n2 = toBase(v2, bases[base]);
+
+                if (v1 === v2) {
+                    resultEl.className = 'result-box';
+                    resultEl.innerHTML = `${n1} <span style="color:#e67e22">=</span> ${n2} <span class="highlight">(เท่ากัน)</span><button class="copy-btn" onclick="copyText('compareResult')">📋</button>`;
+                } else if (v1 > v2) {
+                    resultEl.className = 'result-box';
+                    resultEl.innerHTML = `${n1} <span style="color:#2ecc71">&gt;</span> ${n2} <span class="highlight">(ตัวแรกมากกว่า)</span><button class="copy-btn" onclick="copyText('compareResult')">📋</button>`;
+                } else {
+                    resultEl.className = 'result-box';
+                    resultEl.innerHTML = `${n1} <span style="color:#2ecc71">&lt;</span> ${n2} <span class="highlight">(ตัวแรกน้อยกว่า)</span><button class="copy-btn" onclick="copyText('compareResult')">📋</button>`;
+                }
+                resultEl.style.display = 'block';
+                saveHistory(`Compare: ${n1} vs ${n2} (${base})`);
+            } catch (e) {
+                resultEl.className = 'result-box error';
+                resultEl.innerHTML = e.message;
+            }
+        }
+
+        // ---- Bitwise ----
+        function bitcalc() {
+            const resultEl = document.getElementById('bitResult');
+            const stepEl = document.getElementById('bitSteps');
+            try {
+                const base = document.getElementById('bitFrom').value;
+                const v1 = parseNumber(document.getElementById('bitInput1').value, bases[base]);
+                const op = document.getElementById('bitOp').value;
+                const isTwos = op === 'twos';
+                const v2 = (op === 'not' || isTwos) ? 0 : parseNumber(document.getElementById('bitInput2').value, bases[base]);
+                let result, label;
+
+                if (isTwos) {
+                    const value = v1;
+                    result = value < 0 ? ~Math.abs(value) + 1 : value;
+                    const bits = result < 0 ? ((~result) + 1) : result;
+                    label = "2's complement";
+                    resultEl.className = 'result-box';
+                    resultEl.innerHTML = `ผลลัพธ์: <span class="result-value">${bits.toString(2)}</span><button class="copy-btn" onclick="copyText('bitResult')">📋</button>`;
+                    stepEl.style.display = 'block';
+                    stepEl.innerHTML = `<b>📐 ขั้นตอน (${value} ใน 2's complement):</b><br>` +
+                        `ค่าใน binary: ${Math.abs(value).toString(2)}<br>` +
+                        `กลับบิต (NOT): ${(~Math.abs(value) & 0xFF).toString(2).padStart(8,'0')}<br>` +
+                        `บวก 1: <span class="highlight">${((~Math.abs(value) + 1) & 0xFF).toString(2).padStart(8,'0')}</span> (8-bit)<br>` +
+                        `หมายเหตุ: สำหรับเลขบวกใช้ค่า binary ปกติ`;
+                    saveHistory(`${value} → 2's complement: ${((value < 0 ? ~Math.abs(value)+1 : value) & 0xFF).toString(2).padStart(8,'0')}`);
+                    return;
+                }
+
+                switch (op) {
+                    case 'and': result = v1 & v2; label = 'AND'; break;
+                    case 'or':  result = v1 | v2; label = 'OR'; break;
+                    case 'xor': result = v1 ^ v2; label = 'XOR'; break;
+                    case 'not': result = ~v1; label = 'NOT'; break;
+                    case 'shl': result = v1 << v2; label = '<<'; break;
+                    case 'shr': result = v1 >> v2; label = '>>'; break;
+                }
+                const b1 = v1.toString(2);
+                const b2 = (op === 'not') ? null : v2.toString(2);
+                const br = (result >>> 0).toString(2);
+
+                resultEl.className = 'result-box';
+                resultEl.innerHTML = `ผลลัพธ์: <span class="result-value">${toBase(result >>> 0, bases[base])}</span><button class="copy-btn" onclick="copyText('bitResult')">📋</button>`;
+
+                stepEl.style.display = 'block';
+                let html = `<b>📐 ขั้นตอน (binary):</b><br>`;
+                if (op === 'not') {
+                    html += `${b1} (${v1})<br>${'1'.repeat(Math.max(8,b1.length))} = NOT<br>`;
+                } else {
+                    html += `${b1} (${v1})<br>${label} ${b2} (${v2})<br>`;
+                    html += `${'─'.repeat(40)}<br>`;
+                }
+                html += `<span class="highlight">${br} (${result >>> 0})</span>`;
+                stepEl.innerHTML = html;
+                saveHistory(`${toBase(v1, bases[base])} ${label} ${op==='not'?'':toBase(v2, bases[base])} = ${toBase(result>>>0, bases[base])}`);
+            } catch (e) {
+                resultEl.className = 'result-box error';
+                resultEl.innerHTML = e.message;
+                stepEl.style.display = 'none';
+            }
+        }
+
+        // ---- ข้อความ ----
+        function asciiConvert() {
+            const resultEl = document.getElementById('asciiResult');
+            const stepEl = document.getElementById('asciiSteps');
+            const mode = document.getElementById('asciiMode').value;
+            const input = document.getElementById('asciiInput').value;
+            try {
+                let output;
+                if (mode === 'text2bin') {
+                    if (input === '') throw new Error('กรุณาป้อนข้อความ');
+                    const chars = [...input];
+                    const bins = chars.map(c => c.charCodeAt(0).toString(2).padStart(8, '0'));
+                    output = bins.join(' ');
+                    stepEl.style.display = 'block';
+                    stepEl.innerHTML = `<b>📐 ขั้นตอน:</b><br>` + chars.map((c, i) =>
+                        `'${c}' → U+${c.charCodeAt(0).toString(16).toUpperCase()} → <span class="highlight">${bins[i]}</span>`
+                    ).join('<br>');
+                    saveHistory(`"${input}" → ${output}`);
+                } else {
+                    const bins = input.trim().split(/\s+/).filter(Boolean);
+                    if (bins.length === 0) throw new Error('กรุณาป้อน binary');
+                    const chars = bins.map(b => {
+                        if (!/^[01]+$/.test(b)) throw new Error(`"${b}" ไม่ใช่ binary`);
+                        return String.fromCharCode(parseInt(b, 2));
+                    });
+                    output = chars.join('');
+                    stepEl.style.display = 'block';
+                    stepEl.innerHTML = `<b>📐 ขั้นตอน:</b><br>` + bins.map((b, i) =>
+                        `<span style="color:#4dc3ff">${b}</span> → ${parseInt(b,2)} → '<span class="highlight">${chars[i]}</span>'`
+                    ).join('<br>');
+                    saveHistory(`${input.trim()} → "${output}"`);
+                }
+                resultEl.className = 'result-box';
+                resultEl.innerHTML = `ผลลัพธ์: <span class="result-value">${output}</span><button class="copy-btn" onclick="copyText('asciiResult')">📋</button>`;
+            } catch (e) {
+                resultEl.className = 'result-box error';
+                resultEl.innerHTML = e.message;
+                stepEl.style.display = 'none';
+            }
+        }
+
+        // ---- Theme ----
+        function toggleTheme() {
+            const light = document.body.classList.toggle('light');
+            localStorage.setItem('nb_dark', light ? 'light' : 'dark');
+            document.querySelector('.theme-toggle').textContent = light ? '🌙 โหมดมืด' : '🌓 โหมดสว่าง';
+        }
+        function setColorTheme(name) {
+            ['theme-green','theme-rose','theme-gold','theme-violet'].forEach(c => document.body.classList.remove(c));
+            if (name) document.body.classList.add(name);
+            localStorage.setItem('nb_theme', name);
+        }
+        (function initTheme() {
+            const saved = localStorage.getItem('nb_dark');
+            const light = saved === 'light';
+            if (light) {
+                document.body.classList.add('light');
+                document.querySelector('.theme-toggle').textContent = '🌙';
+            }
+            const theme = localStorage.getItem('nb_theme');
+            if (theme) setColorTheme(theme);
+        })();
+
+        // ---- Background particles ----
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const bin = ['0', '1', '1', '0', '1', '1', '0', '0', '1'];
+            for (let i = 0; i < 18; i++) {
+                const p = document.createElement('span');
+                p.className = 'particle';
+                p.textContent = bin[Math.floor(Math.random() * bin.length)];
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.fontSize = (12 + Math.random() * 14) + 'px';
+                p.style.animationDuration = (12 + Math.random() * 18) + 's';
+                p.style.animationDelay = -(Math.random() * 20) + 's';
+                p.style.opacity = 0.1 + Math.random() * 0.2;
+                container.appendChild(p);
+            }
+        }
+
+        // ---- ฟีเจอร์เพิ่มเติม ----
+        function randomNumber() {
+            const base = document.getElementById('randBase').value;
+            const rand = base === 'bin' ? Math.floor(Math.random() * 256)
+                : base === 'oct' ? Math.floor(Math.random() * 512)
+                : base === 'hex' ? Math.floor(Math.random() * 4096)
+                : Math.floor(Math.random() * 1000);
+            const val = rand.toString(bases[base]).toUpperCase();
+            document.getElementById('randResult').innerHTML =
+                `สุ่มได้: <span class="result-value">${val}</span> (${base})<button class="copy-btn" onclick="copyText('randResult')">📋</button>`;
+            document.getElementById('randResult').dataset.val = val;
+            document.getElementById('randResult').dataset.base = base;
+        }
+
+        function fillConvert() {
+            const r = document.getElementById('randResult');
+            if (!r.dataset.val) { alert('กรุณาสุ่มตัวเลขก่อน'); return; }
+            document.getElementById('convertFrom').value = r.dataset.base;
+            document.getElementById('convertInput').value = r.dataset.val;
+            showPanel('convert', document.querySelector('.tab'));
+        }
+
+        function showAllBases() {
+            const el = document.getElementById('allBasesResult');
+            try {
+                const raw = document.getElementById('convertInput').value;
+                if (!raw.trim()) throw new Error('กรุณาป้อนตัวเลขก่อน');
+                const dec = parseNumber(raw, bases[document.getElementById('convertFrom').value]);
+                const row = (label, v) => `<div><b style="color:#b8c8e8">${label}:</b> <span class="result-value">${v}</span></div>`;
+                el.innerHTML = row('Decimal (10)', dec) +
+                    row('Binary (2)', toBase(dec, 2)) +
+                    row('Octal (8)', toBase(dec, 8)) +
+                    row('Hexadecimal (16)', toBase(dec, 16));
+                el.style.display = 'block';
+                saveHistory(`All bases: ${dec}`);
+            } catch (e) {
+                el.className = 'result-box error';
+                el.innerHTML = e.message;
+            }
+        }
+
+        function downloadAll() {
+            let text = '=== Number Base Tool - History ===\nGenerated: ' + new Date().toLocaleString() + '\n\n';
+            if (history.length === 0) {
+                text += '(No history)';
+            } else {
+                history.forEach((h, i) => text += `${i+1}. [${h.time}] ${h.text}\n`);
+            }
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'number-base-history.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast();
+        }
+
+        // คีย์ลัด
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const active = document.querySelector('.panel.active');
+                if (active) {
+                    const btn = active.querySelector('.btn');
+                    if (btn) btn.click();
+                }
+                e.preventDefault();
+            }
+        });
+
+        renderHistory();
+        createParticles();
+        initTheme();
+    </script>
+</body>
+</html>
