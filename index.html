@@ -592,6 +592,56 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        .member-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+        }
+        .member-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--accent1);
+            transform: translateX(4px);
+        }
+        .member-avatar {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 4px 14px rgba(123, 47, 247, 0.3);
+        }
+        .member-info {
+            min-width: 0;
+        }
+        .member-no {
+            font-size: 0.8em;
+            color: var(--accent1);
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+        .member-name {
+            font-size: 1.05em;
+            font-weight: 500;
+            color: var(--text);
+            word-break: break-word;
+        }
+
         /* Responsive */
         @media (max-width: 560px) {
             .container { padding: 24px 16px; }
@@ -644,6 +694,7 @@
                 <button class="tab" onclick="showPanel('arithmetic', this)">คำนวณ</button>
                 <button class="tab" onclick="showPanel('bitwise', this)">Bitwise</button>
                 <button class="tab" onclick="showPanel('ascii', this)">ข้อความ</button>
+                <button class="tab" onclick="showPanel('members', this)">สมาชิก</button>
             </div>
 
             <!-- แปลงค่า -->
@@ -808,7 +859,37 @@
                 </div>
             </div>
 
-            <!-- ประวัติ -->
+            <!-- สมาชิก -->
+            <div id="members" class="panel">
+                <div class="panel-card">
+                    <div class="form-group">
+                        <label>👥 รายชื่อสมาชิก</label>
+                        <div class="member-list">
+                            <div class="member-item">
+                                <div class="member-avatar" style="background:linear-gradient(135deg,#00d4ff,#00b894)">ก</div>
+                                <div class="member-info">
+                                    <div class="member-no">หมายเลข 001-9</div>
+                                    <div class="member-name">นายกิตติคุณ ปามี</div>
+                                </div>
+                            </div>
+                            <div class="member-item">
+                                <div class="member-avatar" style="background:linear-gradient(135deg,#7b2ff7,#ea80fc)">ว</div>
+                                <div class="member-info">
+                                    <div class="member-no">หมายเลข 004-3</div>
+                                    <div class="member-name">นายวุฒิพงษ์ คำกลั่น</div>
+                                </div>
+                            </div>
+                            <div class="member-item">
+                                <div class="member-avatar" style="background:linear-gradient(135deg,#ff6b9d,#ffb74d)">ก</div>
+                                <div class="member-info">
+                                    <div class="member-no">หมายเลข 003-5</div>
+                                    <div class="member-name">นายกัณญ์ติพัฒน์ ถิรวัฒน์เดชาวัตร</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="history">
                 <h3>
                     📜 ประวัติการใช้งาน
